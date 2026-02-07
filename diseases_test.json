@@ -1,0 +1,603 @@
+﻿[
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_1060149",
+    "id": "MONDO_1060149",
+    "name": "ACAN-related short stature spectrum"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000503",
+    "id": "EFO_0000503",
+    "name": "Alzheimer's Disease"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0002087",
+    "id": "MONDO_0002087",
+    "name": "Anxiety Disorder"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0003778",
+    "id": "EFO_0003778",
+    "name": "Asthma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000231",
+    "id": "EFO_0000231",
+    "name": "Autism Spectrum Disorder"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0007789",
+    "id": "EFO_0007789",
+    "name": "BMI-adjusted waist circumference"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000537",
+    "id": "EFO_0000537",
+    "name": "Bipolar Disorder"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0006859",
+    "id": "EFO_0006859",
+    "name": "Brain Cancer"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0032908",
+    "id": "MONDO_0032908",
+    "name": "CEBALID syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0100571",
+    "id": "MONDO_0100571",
+    "name": "CTNNB1-related neurodevelopmental disorder and/or vitreoretinopathy"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0004992",
+    "id": "MONDO_0004992",
+    "name": "Cancer"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000313",
+    "id": "EFO_0000313",
+    "name": "Cardiomyopathy"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000095",
+    "id": "EFO_0000095",
+    "name": "Chronic Kidney Disease"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0001378",
+    "id": "EFO_0001378",
+    "name": "Colorectal Cancer"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0013678",
+    "id": "MONDO_0013678",
+    "name": "EDICT syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0004198",
+    "id": "EFO_0004198",
+    "name": "Epilepsy"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0003884",
+    "id": "EFO_0003884",
+    "name": "Glioblastoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_1000283",
+    "id": "EFO_1000283",
+    "name": "Grade III Prostatic Intraepithelial Neoplasia"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000341",
+    "id": "EFO_0000341",
+    "name": "Headache/Migraine"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0003060",
+    "id": "EFO_0003060",
+    "name": "Hepatocellular Carcinoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000708",
+    "id": "EFO_0000708",
+    "name": "Kidney/Renal Cancer"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000571",
+    "id": "EFO_0000571",
+    "name": "Leukemia"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0010851",
+    "id": "MONDO_0010851",
+    "name": "Lowry-MacLean syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000673",
+    "id": "EFO_0000673",
+    "name": "Lymphoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000691",
+    "id": "EFO_0000691",
+    "name": "Melanoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_1000392",
+    "id": "EFO_1000392",
+    "name": "Neoplastic Medium-Sized B-Lymphocyte with Basophilic Cytoplasm"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000694",
+    "id": "EFO_0000694",
+    "name": "Neuroblastoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000699",
+    "id": "EFO_0000699",
+    "name": "Osteosarcoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000182",
+    "id": "EFO_0000182",
+    "name": "Ovarian Cancer"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_1000435",
+    "id": "EFO_1000435",
+    "name": "Ovarian Transitional Cell Carcinoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0012589",
+    "id": "MONDO_0012589",
+    "name": "Pitt-Hopkins syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_1000492",
+    "id": "EFO_1000492",
+    "name": "Primary Intraosseous Squamous Cell Carcinoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000181",
+    "id": "EFO_0000181",
+    "name": "Prostate Cancer"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000676",
+    "id": "EFO_0000676",
+    "name": "Psoriasis"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: Orphanet_183524",
+    "id": "Orphanet_183524",
+    "name": "Rare genetic bone disease"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0010006",
+    "id": "MONDO_0010006",
+    "name": "Sandhoff disease"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0031400",
+    "id": "MONDO_0031400",
+    "name": "Tessadori-Van-Haaften neurodevelopmental syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0000616",
+    "id": "EFO_0000616",
+    "name": "Type 2 Diabetes"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0002609",
+    "id": "EFO_0002609",
+    "name": "Ulcerative Colitis"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0859177",
+    "id": "MONDO_0859177",
+    "name": "VISS syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0010446",
+    "id": "MONDO_0010446",
+    "name": "X-linked cone dysfunction syndrome with myopia"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0014936",
+    "id": "MONDO_0014936",
+    "name": "ZTTK syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0100387",
+    "id": "MONDO_0100387",
+    "name": "acute myeloid leukemia, Monosomy 7"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0007125",
+    "id": "MONDO_0007125",
+    "name": "ankyloglossia"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0007156",
+    "id": "MONDO_0007156",
+    "name": "arthritis, sacroiliac"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0010040",
+    "id": "MONDO_0010040",
+    "name": "ataxia, spastic, childhood-onset, autosomal recessive, with optic atrophy and intellectual disability"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0060457",
+    "id": "MONDO_0060457",
+    "name": "autoinflammation with arthritis and dyskeratosis"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0030986",
+    "id": "MONDO_0030986",
+    "name": "blistering, acantholytic, of oral and laryngeal mucosa"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0012374",
+    "id": "MONDO_0012374",
+    "name": "brachyphalangy, polydactyly, and tibial aplasia/hypoplasia"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0007191",
+    "id": "EFO_0007191",
+    "name": "cannabis dependence"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_1001442",
+    "id": "EFO_1001442",
+    "name": "cardiac tuberculosis"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0003900",
+    "id": "EFO_0003900",
+    "name": "ciliopathy"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0024659",
+    "id": "MONDO_0024659",
+    "name": "colorectal Kaposi sarcoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0009062",
+    "id": "MONDO_0009062",
+    "name": "cystic fibrosis-gastritis-megaloblastic anemia syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0007584",
+    "id": "MONDO_0007584",
+    "name": "exostoses-anetodermia-brachydactyly type E syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_1000934",
+    "id": "EFO_1000934",
+    "name": "eyelid neoplasm"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0007376",
+    "id": "MONDO_0007376",
+    "name": "fleck corneal dystrophy"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_1001252",
+    "id": "EFO_1001252",
+    "name": "gastric cardia carcinoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0012110",
+    "id": "MONDO_0012110",
+    "name": "growth delay due to insulin-like growth factor type 1 deficiency"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0005950",
+    "id": "EFO_0005950",
+    "name": "head and neck neoplasia"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0005562",
+    "id": "EFO_0005562",
+    "name": "hydronephrosis"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0032766",
+    "id": "MONDO_0032766",
+    "name": "hypoalphalipoproteinemia, primary, 2"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0017400",
+    "id": "MONDO_0017400",
+    "name": "hypoplastic pancreas-intestinal atresia-hypoplastic gallbalder syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0032780",
+    "id": "MONDO_0032780",
+    "name": "hypotonia, hypoventilation, impaired intellectual development, dysautonomia, epilepsy, and eye abnormalities"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0007811",
+    "id": "MONDO_0007811",
+    "name": "ichthyosis-cheek-eyebrow syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0009094",
+    "id": "EFO_0009094",
+    "name": "idiopathic dilated cardiomyopathy"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0014491",
+    "id": "MONDO_0014491",
+    "name": "immunodeficiency 37"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0020010",
+    "id": "MONDO_0020010",
+    "name": "infectious disorder of the nervous system"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0012845",
+    "id": "MONDO_0012845",
+    "name": "inflammatory bowel disease 19"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0100239",
+    "id": "MONDO_0100239",
+    "name": "inherited hypertrophic pyloric stenosis"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0020099",
+    "id": "MONDO_0020099",
+    "name": "inherited sideroblastic anemia"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0030849",
+    "id": "MONDO_0030849",
+    "name": "intellectual developmental disorder with speech delay and axonal peripheral neuropathy"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0009869",
+    "id": "MONDO_0009869",
+    "name": "isolated Pierre-Robin syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0000062",
+    "id": "MONDO_0000062",
+    "name": "isolated microphthalmia"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0020655",
+    "id": "MONDO_0020655",
+    "name": "juvenile ankylosing spondylitis"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0006352",
+    "id": "EFO_0006352",
+    "name": "laryngeal squamous cell carcinoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0001071",
+    "id": "EFO_0001071",
+    "name": "lung carcinoma"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0020663",
+    "id": "MONDO_0020663",
+    "name": "malignant spindle cell neoplasm"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0100033",
+    "id": "MONDO_0100033",
+    "name": "metabolic epilepsy"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0009674",
+    "id": "MONDO_0009674",
+    "name": "muscular dystrophy, adult-onset, with leukoencephalopathy"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0008127",
+    "id": "MONDO_0008127",
+    "name": "ophthalmomandibulomelic dysplasia"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0005626",
+    "id": "EFO_0005626",
+    "name": "pancolitis"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0001067",
+    "id": "EFO_0001067",
+    "name": "parasitic infection"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_1001100",
+    "id": "EFO_1001100",
+    "name": "peritoneal neoplasm"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0010896",
+    "id": "MONDO_0010896",
+    "name": "pigment dispersion syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0016460",
+    "id": "MONDO_0016460",
+    "name": "polyvalvular heart disease syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0013787",
+    "id": "MONDO_0013787",
+    "name": "psychomotor retardation, epilepsy, and craniofacial dysmorphism"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_1001151",
+    "id": "EFO_1001151",
+    "name": "renal glycosuria"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0021822",
+    "id": "EFO_0021822",
+    "name": "right atrial maximum area measurement"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0002847",
+    "id": "MONDO_0002847",
+    "name": "skeletal muscle cancer"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0024294",
+    "id": "MONDO_0024294",
+    "name": "skin disorder caused by infection"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0017981",
+    "id": "MONDO_0017981",
+    "name": "syngnathia-cleft palate syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0010127",
+    "id": "MONDO_0010127",
+    "name": "thymoma, familial"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0032645",
+    "id": "MONDO_0032645",
+    "name": "trichohepatoneurodevelopmental syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0004284",
+    "id": "EFO_0004284",
+    "name": "upper aerodigestive tract neoplasm"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: EFO_0009484",
+    "id": "EFO_0009484",
+    "name": "uterine polyp"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0859184",
+    "id": "MONDO_0859184",
+    "name": "ventriculomegaly and arthrogryposis"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0032655",
+    "id": "MONDO_0032655",
+    "name": "visual impairment and progressive phthisis bulbi"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: MONDO_0800412",
+    "id": "MONDO_0800412",
+    "name": "yakut short stature syndrome"
+  },
+  {
+    "category": "Disease",
+    "description": "Disease identifier: Orphanet_254704",
+    "id": "Orphanet_254704",
+    "name": "Orphanet_254704"
+  }
+]
+

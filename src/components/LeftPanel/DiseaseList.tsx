@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
 import { useApp } from '../../context/AppContext';
-import { diseases } from '../../data/diseases';
-import { drugsByDisease } from '../../data/drugs';
+import { diseases as staticDiseases } from '../../data/diseases';
 import { fadeIn, scaleIn } from '../../utils/animations';
 
 export function DiseaseList({ searchQuery = '' }: { searchQuery?: string }) {
-    const { selectedDisease, setSelectedDisease, setSelectedDrug, setModelState } = useApp();
+    const { selectedDisease, setSelectedDisease, diseases: apiDiseases } = useApp();
+
+    // Use API diseases if available, otherwise fall back to static data
+    const diseases = apiDiseases.length > 0 ? apiDiseases : staticDiseases;
 
     // Filter diseases based on search query
     const filteredDiseases = diseases.filter(disease =>
@@ -14,16 +16,8 @@ export function DiseaseList({ searchQuery = '' }: { searchQuery?: string }) {
     );
 
     const handleDiseaseSelect = (disease: typeof diseases[0]) => {
-        // Update disease selection
+        // Update disease selection - AppContext handles the rest
         setSelectedDisease(disease);
-
-        // Reset drug selection
-        setSelectedDrug(null);
-
-        // Trigger state progression: analyzing → matching → scoring
-        setModelState('analyzing');
-        setTimeout(() => setModelState('matching'), 800);
-        setTimeout(() => setModelState('scoring'), 1600);
     };
 
     return (
@@ -33,12 +27,13 @@ export function DiseaseList({ searchQuery = '' }: { searchQuery?: string }) {
         >
             {filteredDiseases.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
-                    No diseases found matching "{searchQuery}"
+                    {searchQuery
+                        ? `No diseases found matching "${searchQuery}"`
+                        : 'Loading diseases...'}
                 </div>
             ) : (
                 filteredDiseases.map((disease, index) => {
                     const isSelected = selectedDisease?.id === disease.id;
-                    const hasDrugs = drugsByDisease[disease.id]?.length > 0;
 
                     return (
                         <motion.button
@@ -64,7 +59,6 @@ export function DiseaseList({ searchQuery = '' }: { searchQuery?: string }) {
                                     </div>
                                     <div className="text-xs text-muted-foreground mt-0.5">
                                         {disease.category}
-                                        {hasDrugs && ` · ${drugsByDisease[disease.id].length} candidates`}
                                     </div>
                                 </div>
                                 {isSelected && (
@@ -81,6 +75,3 @@ export function DiseaseList({ searchQuery = '' }: { searchQuery?: string }) {
         </motion.div>
     );
 }
-
-// Import scaleIn animation
-
