@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-background: #FAFAFA;
+  --color-foreground: #0A0A0A;
+  --color-muted: #F5F5F5;
+  --color-muted-foreground: #737373;
+  --color-border: #E5E5E5;
+  --color-accent: #6366F1;
+  --color-accent-foreground: #FFFFFF;
+  --color-secondary: #F4F4F5;
+  --color-secondary-foreground: #18181B;
+
+  /* Font */
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Spacing */
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+
+  /* Animations */
+  --animate-fade-in: fadeIn 200ms ease-out;
+  --animate-slide-in: slideIn 200ms ease-out;
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    0% {
+      transform: translateY(4px);
+      opacity: 0;
+    }
+
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Transition timings */
+  --ease-calm: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Shadows */
+  --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-soft-md: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Premium scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+    transition: background 200ms ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+}
+
+@layer utilities {
+
+  /* Premium text hierarchy */
+  .text-premium-title {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  .text-premium-body {
+    @apply text-sm text-muted-foreground leading-relaxed;
+  }
+
+  .text-premium-label {
+    @apply text-xs font-medium text-muted-foreground uppercase tracking-wider;
+  }
+
+  /* Calm transitions */
+  .transition-calm {
+    transition-timing-function: var(--ease-calm);
+    transition-duration: 200ms;
+  }
+
+  /* Premium panel */
+  .panel {
+    @apply bg-white border-r border-border;
+  }
+
+  /* Minimal focus ring */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-accent/20 focus:ring-offset-0;
+  }
+}
