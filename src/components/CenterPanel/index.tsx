@@ -2,6 +2,7 @@ import { useApp } from '../../context/AppContext';
 import { StateIndicator } from './StateIndicator';
 import { NetworkGraph } from './NetworkGraph';
 import { AboutSection } from './AboutSection';
+import { MolecularViewer } from './MolecularViewer';
 import { generateGraphData } from '../../data/graph';
 
 export function CenterPanel() {
@@ -20,9 +21,26 @@ export function CenterPanel() {
 
                 {selectedDisease ? (
                     <>
-                        {/* Network Visualization */}
-                        <div className="bg-white rounded-xl border border-border p-6 mb-6" style={{ height: '500px' }}>
-                            <NetworkGraph data={graphData} />
+                        {/* Two-column layout for visualizations */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            {/* Network Visualization */}
+                            <div className="bg-white rounded-xl border border-border p-6" style={{ height: '400px' }}>
+                                <h3 className="text-sm font-medium text-muted-foreground mb-3">Drug-Disease Network</h3>
+                                <div style={{ height: 'calc(100% - 30px)' }}>
+                                    <NetworkGraph data={graphData} />
+                                </div>
+                            </div>
+
+                            {/* 3D Molecular Structure */}
+                            <div className="bg-white rounded-xl border border-border p-6" style={{ height: '400px' }}>
+                                <h3 className="text-sm font-medium text-muted-foreground mb-3">Molecular Structure</h3>
+                                <div style={{ height: 'calc(100% - 30px)' }}>
+                                    <MolecularViewer
+                                        drugId={selectedDrug?.id || null}
+                                        drugName={selectedDrug?.name}
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         {/* About Section */}
