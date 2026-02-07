@@ -606,89 +606,73 @@ def get_diseases():
 
 @app.route('/api/predict/<disease_id>', methods=['GET'])
 def predict_drugs(disease_id: str):
-    """Predict drug repurposing candidates for a disease."""
+    """Predict drug repurposing candidates for a disease.
+    
+    Only returns drugs that have actual training data for this specific disease,
+    ensuring predictions are disease-relevant.
+    """
     if train_pairs is None or train_features is None:
         return jsonify({'error': 'Data not loaded'}), 500
     
     # Get top_k parameter
     top_k = request.args.get('top_k', 10, type=int)
     
-    # Find all drug-disease pairs for this disease in training data
+    # Get ONLY drugs that have training data for this specific disease
     disease_mask = train_pairs['disease_id'] == disease_id
+    disease_pairs = train_pairs[disease_mask]
     
-    if not disease_mask.any():
-        # Disease not in training data, use all drugs
-        drug_ids = drugs_list['drug_id'].values if drugs_list is not None else train_pairs['chembl_id'].unique()
-    else:
-        # Get drugs that were paired with this disease
-        drug_ids = train_pairs[disease_mask]['chembl_id'].unique()
+    if len(disease_pairs) == 0:
+        return jsonify({
+            'disease': {
+                'id': disease_id,
+                'name': get_disease_name(disease_id)
+            },
+            'predictions': [],
+            'message': 'No training data available for this disease'
+        })
     
     predictions = []
     
-    for drug_id in drug_ids[:50]:  # Limit for performance
-        # Find the feature row for this drug-disease pair
-        pair_mask = (train_pairs['chembl_id'] == drug_id) & (train_pairs['disease_id'] == disease_id)
+    # Iterate only over drugs that have data for this disease
+    for idx, row in disease_pairs.iterrows():
+        drug_id = row['chembl_id']
         
-        if pair_mask.any():
-            # Get the index of this pair
-            pair_idx = pair_mask.idxmax()
+        # Get features for this exact drug-disease pair
+        if idx < len(train_features):
+            features_row = train_features.iloc[idx]
+            feature_vector = np.array([features_row.get(f, 0.0) for f in FEATURE_NAMES])
             
-            # Get features for this pair
-            if pair_idx < len(train_features):
-                features_row = train_features.iloc[pair_idx]
-                feature_vector = np.array([features_row.get(f, 0.0) for f in FEATURE_NAMES])
+            # Predict probability
+            try:
+                if model is not None:
+                    # Use DMatrix for Booster prediction
+                    dmatrix = xgb.DMatrix(np.array([feature_vector]), feature_names=FEATURE_NAMES)
+                    prob = float(model.predict(dmatrix)[0])
+                    # Ensure prob is between 0 and 1 (might be raw score)
+                    if prob < 0 or prob > 1:
+                        prob = 1 / (1 + np.exp(-prob))  # Sigmoid
+                else:
+                    # Fallback: use feature-based scoring
+                    gene_overlap = features_row.get('gene_overlap_count', 0)
+                    assoc_score = features_row.get('max_association_score', 0)
+                    prob = min(0.95, (gene_overlap * 0.1 + assoc_score) / 2)
                 
-                # Note: Scaler was trained on different features, so we skip scaling
-                # to avoid feature count mismatch errors
-                
-                # Predict probability
-                try:
-                    if model is not None:
-                        # Use DMatrix for Booster prediction
-                        dmatrix = xgb.DMatrix(np.array([feature_vector]), feature_names=FEATURE_NAMES)
-                        prob = float(model.predict(dmatrix)[0])
-                        # Ensure prob is between 0 and 1 (might be raw score)
-                        if prob < 0 or prob > 1:
-                            prob = 1 / (1 + np.exp(-prob))  # Sigmoid
-                    else:
-                        # Fallback: use feature-based scoring
-                        gene_overlap = features_row.get('gene_overlap_count', 0)
-                        assoc_score = features_row.get('max_association_score', 0)
-                        prob = min(0.95, (gene_overlap * 0.1 + assoc_score) / 2)
-                    
-                    predictions.append({
-                        'drug_id': drug_id,
-                        'drug_name': get_drug_name(drug_id),
-                        'score': float(prob),
-                        'confidenceTier': get_confidence_tier(prob),
-                        'gene_overlap': int(features_row.get('gene_overlap_count', 0)),
-                        'association_score': float(features_row.get('max_association_score', 0)),
-                        'mechanismSummary': f'ML prediction score: {prob:.2%}',
-                        'diseaseRelevance': f'Predicted for {get_disease_name(disease_id)}',
-                        'knownLimitations': ['This is a computational prediction', 'Clinical validation required'],
-                        'targets': [],
-                        'pathways': []
-                    })
-                except Exception as e:
-                    print(f"Prediction error for {drug_id}: {e}")
-                    continue
-    
-    # If no predictions found, generate placeholder predictions using available drugs
-    if not predictions and drugs_list is not None:
-        for idx, drug_id in enumerate(drugs_list['drug_id'].values[:20]):
-            predictions.append({
-                'drug_id': drug_id,
-                'drug_name': get_drug_name(drug_id),
-                'score': max(0.1, 0.9 - idx * 0.05),
-                'confidenceTier': get_confidence_tier(max(0.1, 0.9 - idx * 0.05)),
-                'gene_overlap': 0,
-                'association_score': 0.0,
-                'mechanismSummary': 'Prediction based on model analysis',
-                'diseaseRelevance': f'Candidate for {get_disease_name(disease_id)}',
-                'knownLimitations': ['Limited training data for this disease'],
-                'targets': [],
-                'pathways': []
-            })
+                predictions.append({
+                    'drug_id': drug_id,
+                    'drug_name': get_drug_name(drug_id),
+                    'score': float(prob),
+                    'confidenceTier': get_confidence_tier(prob),
+                    'gene_overlap': int(features_row.get('gene_overlap_count', 0)),
+                    'association_score': float(features_row.get('max_association_score', 0)),
+                    'mechanismSummary': f'ML prediction score: {prob:.2%}',
+                    'diseaseRelevance': f'Predicted for {get_disease_name(disease_id)}',
+                    'knownLimitations': ['This is a computational prediction', 'Clinical validation required'],
+                    'targets': [],
+                    'pathways': []
+                })
+            except Exception as e:
+                print(f"Prediction error for {drug_id}: {e}")
+                continue
     
     # Sort by score descending
     predictions.sort(key=lambda x: x['score'], reverse=True)
@@ -711,6 +695,119 @@ def get_drug_details(drug_id: str):
         'description': f'Drug identifier: {drug_id}',
         'originalUse': 'See clinical data for indications'
     })
+
+
+@app.route('/api/molecule/<chembl_id>', methods=['GET'])
+def get_molecule_structure(chembl_id: str):
+    """Get 3D molecular structure for a drug from ChEMBL.
+    
+    Returns atoms with 3D coordinates and bond information for visualization.
+    """
+    try:
+        import requests
+        
+        # Fetch SDF (3D structure) from ChEMBL
+        sdf_url = f"https://www.ebi.ac.uk/chembl/api/data/molecule/{chembl_id}.sdf"
+        response = requests.get(sdf_url, timeout=10)
+        
+        if response.status_code != 200:
+            return jsonify({
+                'error': 'Structure not available',
+                'drug_id': chembl_id,
+                'drug_name': get_drug_name(chembl_id)
+            }), 404
+        
+        sdf_content = response.text
+        
+        # Parse the SDF file
+        atoms = []
+        bonds = []
+        
+        lines = sdf_content.split('\n')
+        
+        # SDF format: header lines, then counts line, then atoms, then bonds
+        # Find the counts line (line 4 usually, format: "  X  Y  0  0  0  0...")
+        counts_line_idx = 3
+        if len(lines) > counts_line_idx:
+            counts_line = lines[counts_line_idx].strip()
+            parts = counts_line.split()
+            if len(parts) >= 2:
+                try:
+                    num_atoms = int(parts[0])
+                    num_bonds = int(parts[1])
+                except ValueError:
+                    num_atoms = 0
+                    num_bonds = 0
+                
+                # Parse atom block (starts at line 5)
+                atom_start = 4
+                for i in range(num_atoms):
+                    line_idx = atom_start + i
+                    if line_idx < len(lines):
+                        atom_line = lines[line_idx]
+                        if len(atom_line) >= 30:
+                            try:
+                                # SDF format: X, Y, Z coordinates (10 chars each), then symbol
+                                x = float(atom_line[0:10].strip())
+                                y = float(atom_line[10:20].strip())
+                                z = float(atom_line[20:30].strip())
+                                symbol = atom_line[31:34].strip()
+                                
+                                atoms.append({
+                                    'id': i,
+                                    'symbol': symbol,
+                                    'x': x,
+                                    'y': y,
+                                    'z': z
+                                })
+                            except (ValueError, IndexError):
+                                continue
+                
+                # Parse bond block (after atoms)
+                bond_start = atom_start + num_atoms
+                for i in range(num_bonds):
+                    line_idx = bond_start + i
+                    if line_idx < len(lines):
+                        bond_line = lines[line_idx]
+                        parts = bond_line.split()
+                        if len(parts) >= 3:
+                            try:
+                                # 1-indexed in SDF, convert to 0-indexed
+                                start_atom = int(parts[0]) - 1
+                                end_atom = int(parts[1]) - 1
+                                bond_type = int(parts[2])  # 1=single, 2=double, 3=triple
+                                
+                                if 0 <= start_atom < len(atoms) and 0 <= end_atom < len(atoms):
+                                    bonds.append({
+                                        'start': start_atom,
+                                        'end': end_atom,
+                                        'type': bond_type
+                                    })
+                            except (ValueError, IndexError):
+                                continue
+        
+        if not atoms:
+            return jsonify({
+                'error': 'Could not parse molecular structure',
+                'drug_id': chembl_id,
+                'drug_name': get_drug_name(chembl_id)
+            }), 404
+        
+        return jsonify({
+            'drug_id': chembl_id,
+            'drug_name': get_drug_name(chembl_id),
+            'atoms': atoms,
+            'bonds': bonds,
+            'atom_count': len(atoms),
+            'bond_count': len(bonds)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'drug_id': chembl_id,
+            'drug_name': get_drug_name(chembl_id)
+        }), 500
 
 
 if __name__ == '__main__':
