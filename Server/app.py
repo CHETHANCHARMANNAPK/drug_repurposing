@@ -18,6 +18,7 @@ CORS(app)  # Enable CORS for frontend
 
 # Paths
 CHECKPOINTS_DIR = Path(__file__).parent / "checkpoints"
+API_MODEL_DIR = Path(__file__).parent / "API"
 
 # Feature names (must match the XGBoost model's expected features exactly)
 FEATURE_NAMES = [
@@ -349,13 +350,30 @@ DRUG_NAMES = {
     'CHEMBL939': 'Hydroxychloroquine',
 }
 
-# Global model and data
+# Global model and data (original model)
 model = None
 scaler = None
 train_pairs = None
 train_features = None
 diseases_list = None
 drugs_list = None
+
+# Global model and data (new API model with larger dataset)
+api_model = None
+api_scaler = None
+api_features_df = None
+
+# Extended feature names for the new API model - must match model's expected features exactly
+# The model was trained on 7 features in this exact order (verified via model.feature_names)
+API_FEATURE_NAMES = [
+    'genetic_score',
+    'somatic_score_raw',
+    'somatic_score_masked',
+    'max_association_score',
+    'gene_overlap_count',
+    'mean_plddt',
+    'low_confidence_frac'
+]
 
 
 def load_model_and_data():
@@ -412,13 +430,68 @@ def load_model_and_data():
     
     return train_pairs is not None and train_features is not None
 
+
+def load_api_model():
+    """Load the new XGBoost model and dataset from the API folder."""
+    global api_model, api_scaler, api_features_df
+    
+    print("\n--- Loading API Model (Extended Dataset) ---")
+    
+    # Load XGBoost model from API folder
+    model_path = API_MODEL_DIR / "xgb_temporal_model.json"
+    if model_path.exists():
+        try:
+            api_model = xgb.Booster()
+            api_model.load_model(str(model_path))
+            print(f"✓ Loaded API XGBoost model from {model_path}")
+        except Exception as e:
+            print(f"✗ Error loading API model: {e}")
+            api_model = None
+    else:
+        print(f"✗ API Model not found at {model_path}")
+    
+    # Load scaler from API folder
+    scaler_path = API_MODEL_DIR / "feature_scaler.joblib"
+    if scaler_path.exists():
+        api_scaler = joblib.load(scaler_path)
+        print(f"✓ Loaded API scaler from {scaler_path}")
+    
+    # Load the large features dataset
+    features_path = API_MODEL_DIR / "features_merged.csv"
+    if features_path.exists():
+        api_features_df = pd.read_csv(features_path)
+        print(f"✓ Loaded {len(api_features_df)} drug-disease pairs from API dataset")
+        # Print unique counts
+        unique_drugs = api_features_df['chembl_id'].nunique()
+        unique_diseases = api_features_df['disease_id'].nunique()
+        print(f"  → {unique_drugs} unique drugs, {unique_diseases} unique diseases")
+    else:
+        print(f"✗ Features file not found at {features_path}")
+    
+    return api_model is not None and api_features_df is not None
+
+
 # Dynamic disease name cache (populated from OpenTargets API)
 _disease_name_cache = {}
 _disease_cache_file = CHECKPOINTS_DIR / "disease_names_cache.json"
+_disease_full_cache_file = CHECKPOINTS_DIR / "disease_names_full_cache.json"
 
 def _load_disease_name_cache():
-    """Load disease name cache from file."""
+    """Load disease name cache from file. Prioritizes full cache if available."""
     global _disease_name_cache
+    
+    # Try to load the full cache first (24K+ names)
+    if _disease_full_cache_file.exists():
+        try:
+            import json
+            with open(_disease_full_cache_file, 'r') as f:
+                _disease_name_cache = json.load(f)
+                print(f"✓ Loaded {len(_disease_name_cache)} disease names from full cache")
+                return
+        except Exception as e:
+            print(f"Warning: Could not load full disease name cache: {e}")
+    
+    # Fall back to smaller cache
     if _disease_cache_file.exists():
         try:
             import json
@@ -810,15 +883,322 @@ def get_molecule_structure(chembl_id: str):
         }), 500
 
 
+# ============================================================================
+# NEW API ENDPOINTS - Using Extended Dataset (153K drug-disease pairs)
+# ============================================================================
+
+# Pre-computed diseases list (built at startup for fast access)
+_precomputed_diseases = None
+
+def _build_disease_cache():
+    """Pre-compute all disease data at startup for fast access."""
+    global _precomputed_diseases
+    
+    if api_features_df is None:
+        return
+    
+    print("  → Building disease name cache...")
+    unique_diseases = api_features_df['disease_id'].unique()
+    
+    diseases = []
+    for disease_id in unique_diseases:
+        # Get name from caches or use ID as fallback
+        name = _disease_name_cache.get(disease_id) or DISEASE_NAMES.get(disease_id) or disease_id
+        diseases.append({
+            'id': disease_id,
+            'name': name,
+            'category': 'Disease'
+        })
+    
+    # Sort: human-readable names first, then alphabetically
+    diseases.sort(key=lambda d: (d['name'] == d['id'], d['name'].lower()))
+    _precomputed_diseases = diseases
+    print(f"  → Cached {len(diseases)} diseases")
+
+
+@app.route('/api/v2/diseases', methods=['GET'])
+def get_v2_diseases():
+    """Get paginated list of diseases with optional search.
+    
+    Query params:
+        search: filter diseases by name (case-insensitive)
+        page: page number (default 1)
+        limit: items per page (default 50, max 200)
+    """
+    if _precomputed_diseases is None:
+        if api_features_df is None:
+            return jsonify({'error': 'API data not loaded'}), 500
+        _build_disease_cache()
+    
+    # Get query parameters
+    search = request.args.get('search', '').lower().strip()
+    page = request.args.get('page', 1, type=int)
+    limit = min(request.args.get('limit', 50, type=int), 200)  # Max 200
+    
+    # Filter by search if provided
+    if search:
+        filtered = [d for d in _precomputed_diseases 
+                   if search in d['name'].lower() or search in d['id'].lower()]
+    else:
+        filtered = _precomputed_diseases
+    
+    # Calculate pagination
+    total = len(filtered)
+    start_idx = (page - 1) * limit
+    end_idx = start_idx + limit
+    paginated = filtered[start_idx:end_idx]
+    
+    return jsonify({
+        'diseases': paginated,
+        'total': total,
+        'page': page,
+        'limit': limit,
+        'total_pages': (total + limit - 1) // limit
+    })
+
+
+@app.route('/api/v2/drugs', methods=['GET'])
+def get_v2_drugs():
+    """Get list of drugs from the extended API dataset."""
+    if api_features_df is None:
+        return jsonify({'error': 'API data not loaded'}), 500
+    
+    # Get unique drugs from the API dataset
+    unique_drugs = api_features_df['chembl_id'].unique()
+    
+    drugs = []
+    for drug_id in unique_drugs:  # Return all drugs
+        # Use cached name only (no expensive API lookups)
+        cached_name = _drug_name_cache.get(drug_id) or DRUG_NAMES.get(drug_id)
+        name = cached_name if cached_name else drug_id
+        
+        drugs.append({
+            'id': drug_id,
+            'name': name,
+            'description': f'Drug identifier: {drug_id}'
+        })
+    
+    # Sort: human-readable names first, then by name alphabetically
+    drugs.sort(key=lambda d: (d['name'] == d['id'], d['name'].lower()))
+    
+    return jsonify(drugs)
+
+
+@app.route('/api/repurpose/<disease_id>', methods=['GET'])
+def repurpose_drugs_for_disease(disease_id: str):
+    """Find drug repurposing candidates for a disease using the extended model.
+    
+    This endpoint uses the larger 153K drug-disease pairs dataset
+    to predict which drugs could potentially treat a given disease.
+    """
+    if api_features_df is None or api_model is None:
+        return jsonify({'error': 'API model not loaded'}), 500
+    
+    top_k = request.args.get('top_k', 20, type=int)
+    
+    # Get all drug-disease pairs for this disease
+    disease_data = api_features_df[api_features_df['disease_id'] == disease_id]
+    
+    if len(disease_data) == 0:
+        return jsonify({
+            'disease': {
+                'id': disease_id,
+                'name': get_disease_name(disease_id)
+            },
+            'predictions': [],
+            'message': 'No data available for this disease in the extended dataset'
+        })
+    
+    predictions = []
+    
+    for _, row in disease_data.iterrows():
+        drug_id = row['chembl_id']
+        
+        # Extract features for prediction
+        try:
+            # Properly extract feature values from pandas Series
+            feature_values = []
+            for f in API_FEATURE_NAMES:
+                val = row[f] if f in row.index else 0.0
+                feature_values.append(float(val) if pd.notna(val) else 0.0)
+            feature_vector = np.array(feature_values)
+            
+            if api_model is not None:
+                dmatrix = xgb.DMatrix(np.array([feature_vector]), feature_names=API_FEATURE_NAMES)
+                prob = float(api_model.predict(dmatrix)[0])
+                # Ensure prob is between 0 and 1
+                if prob < 0 or prob > 1:
+                    prob = 1 / (1 + np.exp(-prob))  # Sigmoid
+            else:
+                # Fallback scoring
+                prob = float(row['max_association_score']) if pd.notna(row['max_association_score']) else 0.5
+            
+            # Get additional feature info for explainability
+            gene_overlap = int(row['gene_overlap_count']) if pd.notna(row['gene_overlap_count']) else 0
+            assoc_score = float(row['max_association_score']) if pd.notna(row['max_association_score']) else 0.0
+            gen_score = float(row['genetic_score']) if pd.notna(row['genetic_score']) else 0.0
+            animal_score = float(row['animal_model_score']) if pd.notna(row['animal_model_score']) else 0.0
+            known_score = float(row['known_drug_score']) if pd.notna(row['known_drug_score']) else 0.0
+            max_phase = int(row['drug_max_phase']) if pd.notna(row['drug_max_phase']) else 0
+            
+            predictions.append({
+                'drug_id': drug_id,
+                'drug_name': get_drug_name(drug_id),
+                'score': float(prob),
+                'confidenceTier': get_confidence_tier(prob),
+                'gene_overlap': gene_overlap,
+                'association_score': assoc_score,
+                'genetic_score': gen_score,
+                'animal_model_score': animal_score,
+                'known_drug_score': known_score,
+                'drug_max_phase': max_phase,
+                'mechanismSummary': f'Extended ML prediction score: {prob:.2%}',
+                'diseaseRelevance': f'Based on {gene_overlap} overlapping genes',
+                'knownLimitations': [
+                    'Computational prediction - requires clinical validation',
+                    f'Based on genetic/genomic association score of {row.get("max_association_score", 0):.2f}'
+                ],
+                'targets': [],
+                'pathways': []
+            })
+        except Exception as e:
+            import traceback
+            print(f"Prediction error for {drug_id}: {e}")
+            traceback.print_exc()
+            continue
+    
+    # Sort by score descending
+    predictions.sort(key=lambda x: x['score'], reverse=True)
+    
+    return jsonify({
+        'disease': {
+            'id': disease_id,
+            'name': get_disease_name(disease_id)
+        },
+        'predictions': predictions[:top_k],
+        'total_candidates': len(predictions),
+        'model': 'extended_xgb_temporal'
+    })
+
+
+@app.route('/api/drug-diseases/<drug_id>', methods=['GET'])
+def predict_diseases_for_drug(drug_id: str):
+    """Predict which diseases a drug could potentially treat.
+    
+    This is the reverse lookup - given a drug, find all diseases
+    it might be repurposed for based on the extended model.
+    """
+    if api_features_df is None or api_model is None:
+        return jsonify({'error': 'API model not loaded'}), 500
+    
+    top_k = request.args.get('top_k', 20, type=int)
+    
+    # Get all entries for this drug
+    drug_data = api_features_df[api_features_df['chembl_id'] == drug_id]
+    
+    if len(drug_data) == 0:
+        return jsonify({
+            'drug': {
+                'id': drug_id,
+                'name': get_drug_name(drug_id)
+            },
+            'predictions': [],
+            'message': 'No data available for this drug in the extended dataset'
+        })
+    
+    predictions = []
+    
+    for _, row in drug_data.iterrows():
+        disease_id = row['disease_id']
+        
+        try:
+            # Properly extract feature values from pandas Series
+            feature_values = []
+            for f in API_FEATURE_NAMES:
+                val = row[f] if f in row.index else 0.0
+                feature_values.append(float(val) if pd.notna(val) else 0.0)
+            feature_vector = np.array(feature_values)
+            
+            if api_model is not None:
+                dmatrix = xgb.DMatrix(np.array([feature_vector]), feature_names=API_FEATURE_NAMES)
+                prob = float(api_model.predict(dmatrix)[0])
+                if prob < 0 or prob > 1:
+                    prob = 1 / (1 + np.exp(-prob))
+            else:
+                prob = float(row['max_association_score']) if pd.notna(row['max_association_score']) else 0.5
+            
+            gene_overlap = int(row['gene_overlap_count']) if pd.notna(row['gene_overlap_count']) else 0
+            assoc_score = float(row['max_association_score']) if pd.notna(row['max_association_score']) else 0.0
+            gen_score = float(row['genetic_score']) if pd.notna(row['genetic_score']) else 0.0
+            
+            predictions.append({
+                'disease_id': disease_id,
+                'disease_name': get_disease_name(disease_id),
+                'score': float(prob),
+                'confidenceTier': get_confidence_tier(prob),
+                'gene_overlap': gene_overlap,
+                'association_score': assoc_score,
+                'genetic_score': gen_score,
+                'mechanismSummary': f'Predicted repurposing score: {prob:.2%}'
+            })
+        except Exception as e:
+            print(f"Prediction error for {disease_id}: {e}")
+            continue
+    
+    # Sort by score descending
+    predictions.sort(key=lambda x: x['score'], reverse=True)
+    
+    return jsonify({
+        'drug': {
+            'id': drug_id,
+            'name': get_drug_name(drug_id)
+        },
+        'predictions': predictions[:top_k],
+        'total_diseases': len(predictions),
+        'model': 'extended_xgb_temporal'
+    })
+
+
+@app.route('/api/v2/health', methods=['GET'])
+def health_check_v2():
+    """Health check for the extended API model."""
+    return jsonify({
+        'status': 'healthy',
+        'original_model_loaded': model is not None,
+        'api_model_loaded': api_model is not None,
+        'api_data_loaded': api_features_df is not None,
+        'api_data_size': len(api_features_df) if api_features_df is not None else 0
+    })
+
+
 if __name__ == '__main__':
     print("\n" + "="*50)
     print("🧬 Drug Repurposing Prediction API")
     print("="*50 + "\n")
     
-    if load_model_and_data():
-        print("\n✓ All data loaded successfully")
+    # Load original model
+    original_loaded = load_model_and_data()
+    if original_loaded:
+        print("\n✓ Original model data loaded successfully")
+    
+    # Load new API model with extended dataset
+    api_loaded = load_api_model()
+    if api_loaded:
+        print("\n✓ Extended API model loaded successfully")
+    
+    if original_loaded or api_loaded:
+        print("\n" + "="*50)
+        print("Available endpoints:")
+        print("  - /api/diseases (original model)")
+        print("  - /api/predict/<disease_id> (original model)")
+        print("  - /api/v2/diseases (extended model)")
+        print("  - /api/v2/drugs (extended model)")
+        print("  - /api/repurpose/<disease_id> (extended model)")
+        print("  - /api/drug-diseases/<drug_id> (extended model)")
+        print("="*50)
         print("\nStarting server on http://localhost:5001\n")
         app.run(host='0.0.0.0', port=5001, debug=True)
     else:
-        print("\n✗ Failed to load model or data")
+        print("\n✗ Failed to load any model or data")
         exit(1)
+
